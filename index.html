@@ -1,15 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <link rel="manifest" href="manifest.json">
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js");
-    }
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orçamento de Adesivação</title>
+  <title>EduNet Vendas</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -51,10 +45,6 @@
       border-radius: 6px;
       background: #fdfdfd;
     }
-    textarea {
-      resize: vertical;
-      min-height: 60px;
-    }
     .buttons {
       margin-top: 25px;
       display: flex;
@@ -74,9 +64,6 @@
       cursor: pointer;
       transition: background 0.3s ease;
     }
-    button:hover {
-      background-color: #005dc9;
-    }
     .result {
       margin-top: 30px;
       background: #f0f4ff;
@@ -84,58 +71,23 @@
       border-radius: 8px;
       border-left: 6px solid #007bff;
       font-size: 0.95rem;
-      line-height: 1.6;
-    }
-    @media print {
-      .buttons, h2, input, textarea, label, select {
-        display: none !important;
-      }
-      .result {
-        border: none;
-        padding: 0;
-      }
-      body::before {
-        content: "EduNet - Soluções de Internet e Comunicação Visual\aCNPJ: 17.396.787.0001-55\a\a";
-        white-space: pre;
-        display: block;
-        text-align: center;
-        font-size: 14px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Calculadora de Adesivação</h2>
+    <h2>EduNet Vendas - Calculadora de Adesivação</h2>
     <div class="form-grid">
       <div><label for="cliente">Cliente</label><input type="text" id="cliente" /></div>
       <div><label for="telefone">Telefone</label><input type="text" id="telefone" /></div>
       <div><label for="tipo">Tipo de Veículo</label><input type="text" id="tipo" /></div>
-      <div><label for="altura">Altura (m)</label><input type="number" id="altura" step="0.01" /></div>
-      <div><label for="largura">Largura (m)</label><input type="number" id="largura" step="0.01" /></div>
       <div><label for="quantidade">Área Total (m²)</label><input type="number" id="quantidade" step="0.01" /></div>
-      <div>
-        <label for="material">Tipo de Material</label>
-        <select id="material" onchange="atualizarValores()">
-          <option value="">Selecione...</option>
-          <option value="vinilComum">Vinil comum</option>
-          <option value="vinilPlotagem">Vinil plotagem</option>
-          <option value="banner">Banner</option>
-          <option value="faixa">Faixa</option>
-          <option value="adesivoImpresso">Adesivo impresso</option>
-          <option value="adesivoRecorte">Adesivo impresso + recorte</option>
-          <option value="lona">Lona</option>
-          <option value="fachadaAcm">Fachada ACM</option>
-          <option value="fachadaPs">Fachada PS</option>
-          <option value="outros">Outros</option>
-        </select>
-      </div>
+      <div><label for="material">Material</label><input type="text" id="material" /></div>
       <div><label for="cor">Cor</label><input type="text" id="cor" /></div>
       <div><label for="placa">Placa</label><input type="text" id="placa" /></div>
-      <div><label for="valorMaterial">Valor Material (m²)</label><input type="number" id="valorMaterial" /></div>
-      <div><label for="valorColocacao">Valor Colocação (m²)</label><input type="number" id="valorColocacao" /></div>
+      <div><label for="valorMaterial">Valor Material (m²)</label><input type="number" id="valorMaterial" value="100" /></div>
+      <div><label for="valorColocacao">Valor Colocação (m²)</label><input type="number" id="valorColocacao" value="50" /></div>
+      <div><label for="precoVenda">Preço de Venda (m²)</label><input type="number" id="precoVenda" value="0" /></div>
       <div><label for="desconto">Desconto (R$)</label><input type="number" id="desconto" value="0" /></div>
       <div><label for="entrada">Entrada (R$)</label><input type="number" id="entrada" value="0" /></div>
       <div style="grid-column: 1 / -1;"><label for="descricao">Descrição dos Serviços</label><textarea id="descricao"></textarea></div>
@@ -144,103 +96,107 @@
     <div class="buttons">
       <button onclick="calcular()">Calcular</button>
       <button onclick="window.print()">Imprimir</button>
-      <button onclick="salvarTXT()">Salvar TXT</button>
-      <button onclick="novoOrcamento()">Novo</button>
+      <button onclick="enviarWhatsApp()">Enviar via WhatsApp</button>
     </div>
 
     <div class="result" id="resultado"></div>
   </div>
 
   <script>
-    const precos = {
-      vinilComum: { material: 35, colocacao: 40 },
-      vinilPlotagem: { material: 45, colocacao: 60 },
-      banner: { material: 25, colocacao: 20 },
-      faixa: { material: 30, colocacao: 25 },
-      adesivoImpresso: { material: 50, colocacao: 50 },
-      adesivoRecorte: { material: 60, colocacao: 70 },
-      lona: { material: 38, colocacao: 30 },
-      fachadaAcm: { material: 180, colocacao: 160 },
-      fachadaPs: { material: 120, colocacao: 100 },
-      outros: { material: 0, colocacao: 0 }
-    };
-
     function formatarMoeda(valor) {
       return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    function atualizarValores() {
-      const material = document.getElementById('material').value;
-      if (precos[material]) {
-        document.getElementById('valorMaterial').value = precos[material].material;
-        document.getElementById('valorColocacao').value = precos[material].colocacao;
-      }
-    }
-
     function calcular() {
-      const altura = parseFloat(document.getElementById('altura').value);
-      const largura = parseFloat(document.getElementById('largura').value);
-      let quantidade = parseFloat(document.getElementById('quantidade').value);
-      if (!quantidade && altura && largura) {
-        quantidade = altura * largura;
-        document.getElementById('quantidade').value = quantidade.toFixed(2);
-      }
       const cliente = document.getElementById('cliente').value;
       const telefone = document.getElementById('telefone').value;
       const tipo = document.getElementById('tipo').value;
-      const materialLabel = document.getElementById('material');
-      const material = materialLabel.options[materialLabel.selectedIndex].text;
+      const quantidade = parseFloat(document.getElementById('quantidade').value);
+      const material = document.getElementById('material').value;
       const cor = document.getElementById('cor').value;
       const placa = document.getElementById('placa').value;
       const valorMaterial = parseFloat(document.getElementById('valorMaterial').value);
       const valorColocacao = parseFloat(document.getElementById('valorColocacao').value);
+      const precoVenda = parseFloat(document.getElementById('precoVenda').value);
       const desconto = parseFloat(document.getElementById('desconto').value);
       const entrada = parseFloat(document.getElementById('entrada').value);
       const descricao = document.getElementById('descricao').value;
-      if (!cliente || !telefone || !tipo || !material || !cor || !placa || !quantidade || isNaN(valorMaterial) || isNaN(valorColocacao)) {
-        document.getElementById('resultado').innerHTML = '⚠️ Preencha todos os campos obrigatórios.';
-        return;
-      }
+
+      
+
       const totalMaterial = quantidade * valorMaterial;
       const totalColocacao = quantidade * valorColocacao;
       const totalBruto = totalMaterial + totalColocacao;
       const totalComDesconto = totalBruto - desconto;
       const restante = totalComDesconto - entrada;
+
+      const lucroPorMetro = precoVenda - (valorMaterial + valorColocacao);
+      const lucroTotal = lucroPorMetro * quantidade;
+
       document.getElementById('resultado').innerHTML = `
         <strong>Cliente:</strong> ${cliente}<br>
         <strong>Telefone:</strong> ${telefone}<br>
-        <strong>Veículo:</strong> ${tipo} - Placa ${placa}<br>
-        <strong>Material:</strong> ${material} (${cor})<br>
+        <strong>Tipo de Veículo:</strong> ${tipo}<br>
+        <strong>Material:</strong> ${material}<br>
+        <strong>Cor:</strong> ${cor}<br>
+        <strong>Placa:</strong> ${placa}<br>
         <strong>Descrição:</strong> ${descricao}<br>
-        <strong>Altura x Largura:</strong> ${altura || 0}m x ${largura || 0}m<br>
-        <strong>Área Total:</strong> ${quantidade.toFixed(2)} m²<br><hr>
-        <strong>Valor Material:</strong> ${formatarMoeda(valorMaterial)} x ${quantidade} = ${formatarMoeda(totalMaterial)}<br>
-        <strong>Valor Colocação:</strong> ${formatarMoeda(valorColocacao)} x ${quantidade} = ${formatarMoeda(totalColocacao)}<br>
+        <hr>
+        Quantidade: <strong>${quantidade.toFixed(2)} m²</strong><br>
+        Valor Material: ${formatarMoeda(valorMaterial)}<br>
+        Valor Colocação: ${formatarMoeda(valorColocacao)}<br>
+        <strong>Total Material:</strong> ${formatarMoeda(totalMaterial)}<br>
+        <strong>Total Colocação:</strong> ${formatarMoeda(totalColocacao)}<br>
         <strong>Total Bruto:</strong> ${formatarMoeda(totalBruto)}<br>
-        <strong>Desconto:</strong> - ${formatarMoeda(desconto)}<br>
+        Desconto: -${formatarMoeda(desconto)}<br>
         <strong>Total com Desconto:</strong> ${formatarMoeda(totalComDesconto)}<br>
-        <strong>Entrada:</strong> ${formatarMoeda(entrada)}<br>
-        <strong>Restante:</strong> ${formatarMoeda(restante)}
+        Entrada: ${formatarMoeda(entrada)}<br>
+        <strong>Restante:</strong> ${formatarMoeda(restante)}<br><hr>
+        <strong>Preço de Venda:</strong> ${formatarMoeda(precoVenda)} por m²<br>
+        <strong>Lucro por m²:</strong> ${formatarMoeda(lucroPorMetro)}<br>
+        <strong>Lucro Total Estimado:</strong> ${formatarMoeda(lucroTotal)}
       `;
     }
 
-    function salvarTXT() {
-      const cliente = document.getElementById('cliente').value || 'cliente';
-      const resultado = document.getElementById('resultado').innerText;
-      const blob = new Blob([resultado], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `orcamento_${cliente.replace(/\s+/g, '_')}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    function enviarWhatsApp() {
+      const cliente = document.getElementById('cliente').value || '-';
+      const tipo = document.getElementById('tipo').value || '-';
+      const placa = document.getElementById('placa').value || '-';
+      const material = document.getElementById('material').value || '-';
+      const cor = document.getElementById('cor').value || '-';
+      const quantidade = document.getElementById('quantidade').value || '-';
+      const valorMaterial = document.getElementById('valorMaterial').value || '0';
+      const valorColocacao = document.getElementById('valorColocacao').value || '0';
+      const precoVenda = document.getElementById('precoVenda').value || '0';
+      const desconto = document.getElementById('desconto').value || '0';
+      const entrada = document.getElementById('entrada').value || '0';
 
-    function novoOrcamento() {
-      document.querySelectorAll('input, textarea, select').forEach(el => el.value = '');
-      document.getElementById('desconto').value = 0;
-      document.getElementById('entrada').value = 0;
-      document.getElementById('resultado').innerHTML = '';
+      const totalMaterial = quantidade * valorMaterial;
+      const totalColocacao = quantidade * valorColocacao;
+      const totalBruto = totalMaterial + totalColocacao;
+      const totalComDesconto = totalBruto - desconto;
+      const restante = totalComDesconto - entrada;
+
+      const lucroPorMetro = precoVenda - (parseFloat(valorMaterial) + parseFloat(valorColocacao));
+      const lucroTotal = lucroPorMetro * quantidade;
+
+      let mensagem = `🧾 ORÇAMENTO - EduNet Vendas%0A%0A`;
+      mensagem += `Cliente: ${cliente}%0A`;
+      mensagem += `Veículo: ${tipo} - Placa ${placa}%0A`;
+      mensagem += `Material: ${material} (${cor})%0A`;
+      mensagem += `Quantidade: ${quantidade} m²%0A`;
+      mensagem += `Valor Material: R$ ${parseFloat(valorMaterial).toFixed(2)}%0A`;
+      mensagem += `Valor Colocação: R$ ${parseFloat(valorColocacao).toFixed(2)}%0A`;
+      mensagem += `Total Bruto: R$ ${totalBruto.toFixed(2)}%0A`;
+      mensagem += `Desconto: R$ ${parseFloat(desconto).toFixed(2)}%0A`;
+      mensagem += `Total com Desconto: R$ ${totalComDesconto.toFixed(2)}%0A`;
+      mensagem += `Entrada: R$ ${parseFloat(entrada).toFixed(2)}%0A`;
+      mensagem += `Restante: R$ ${restante.toFixed(2)}%0A%0A`;
+      mensagem += `Lucro por m²: R$ ${lucroPorMetro.toFixed(2)}%0A`;
+      mensagem += `Lucro Total: R$ ${lucroTotal.toFixed(2)}%0A%0A`;
+      mensagem += `Gerado pelo sistema EduNet Vendas.`;
+
+      window.open(`https://wa.me/?text=${mensagem}`, '_blank');
     }
   </script>
 </body>
