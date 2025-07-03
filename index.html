@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EduNet Vendas</title>
+  <title>Orçamentos EduNet</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
       margin: 0;
       padding: 20px;
-      background-color: #f8f9fb;
+      background-color: #f0f2f5;
       color: #333;
     }
     .container {
@@ -58,7 +58,7 @@
       padding: 12px 16px;
       border: none;
       border-radius: 6px;
-      background-color: #007bff;
+      background-color: #4a90e2;
       color: white;
       font-size: 0.95rem;
       cursor: pointer;
@@ -69,14 +69,14 @@
       background: #f0f4ff;
       padding: 20px;
       border-radius: 8px;
-      border-left: 6px solid #007bff;
+      border-left: 6px solid #4a90e2;
       font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>EduNet Vendas - Calculadora de Adesivação</h2>
+    <h2>Orçamentos EduNet - Calculadora de Adesivação</h2>
     <div class="form-grid">
       <div><label for="cliente">Cliente</label><input type="text" id="cliente" /></div>
       <div><label for="telefone">Telefone</label><input type="text" id="telefone" /></div>
@@ -180,7 +180,7 @@
       const lucroPorMetro = precoVenda - (parseFloat(valorMaterial) + parseFloat(valorColocacao));
       const lucroTotal = lucroPorMetro * quantidade;
 
-      let mensagem = `🧾 ORÇAMENTO - EduNet Vendas%0A%0A`;
+      let mensagem = `🧾 ORÇAMENTO - Orçamentos EduNet%0A%0A`;
       mensagem += `Cliente: ${cliente}%0A`;
       mensagem += `Veículo: ${tipo} - Placa ${placa}%0A`;
       mensagem += `Material: ${material} (${cor})%0A`;
@@ -194,7 +194,7 @@
       mensagem += `Restante: R$ ${restante.toFixed(2)}%0A%0A`;
       mensagem += `Lucro por m²: R$ ${lucroPorMetro.toFixed(2)}%0A`;
       mensagem += `Lucro Total: R$ ${lucroTotal.toFixed(2)}%0A%0A`;
-      mensagem += `Gerado pelo sistema EduNet Vendas.`;
+      mensagem += `Gerado pelo sistema Orçamentos EduNet.`;
 
       window.open(`https://wa.me/?text=${mensagem}`, '_blank');
     }
