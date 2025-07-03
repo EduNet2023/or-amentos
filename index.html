@@ -186,7 +186,7 @@
       mensagem += `Lucro estimado: R$ ${lucroTotal.toFixed(2)}%0A%0A`;
       mensagem += `Gerado por Orçamentos EduNet.`;
 
-      window.open(`https://wa.me/?text=${mensagem}`, '_blank');
+      window.location.href = `https://wa.me/?text=${mensagem}`;
     }
   </script>
 </body>
