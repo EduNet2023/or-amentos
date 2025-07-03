@@ -1,6 +1,6 @@
 self.addEventListener("install", function(e) {
   e.waitUntil(
-    caches.open("calc-adesivacao").then(function(cache) {
+    caches.open("orcamentos-edunet").then(function(cache) {
       return cache.addAll(["index.html"]);
     })
   );
